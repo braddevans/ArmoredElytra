@@ -31,7 +31,8 @@ hs_err_pid*
 .idea/
 .project
 .settings/
-ArmoredElytra (1).iml
 NBTChange
 dependency-reduced-pom.xml
 mover.xml
+/.gradle/
+/build/
