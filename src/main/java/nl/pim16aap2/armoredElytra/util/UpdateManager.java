@@ -9,35 +9,29 @@ import java.util.logging.Level;
 /**
  * @author Pim
  */
-public final class UpdateManager
-{
+public final class UpdateManager {
     private final ArmoredElytra plugin;
-    private boolean checkForUpdates = false;
-
     private final UpdateChecker updater;
+    private boolean checkForUpdates = false;
     private BukkitTask updateRunner = null;
 
-    public UpdateManager(final ArmoredElytra plugin, final int pluginID)
-    {
+    public UpdateManager(final ArmoredElytra plugin, final int pluginID) {
         this.plugin = plugin;
         updater = UpdateChecker.init(plugin, pluginID);
     }
 
-    public void setEnabled(final boolean newCheckForUpdates)
-    {
+    public void setEnabled(final boolean newCheckForUpdates) {
         checkForUpdates = newCheckForUpdates;
         initUpdater();
     }
 
-    public String getNewestVersion()
-    {
+    public String getNewestVersion() {
         if (!checkForUpdates || updater.getLastResult() == null)
             return null;
         return updater.getLastResult().getNewestVersion();
     }
 
-    public boolean updateAvailable()
-    {
+    public boolean updateAvailable() {
         // Updates disabled, so no new updates available by definition.
         if (!checkForUpdates || updater.getLastResult() == null)
             return false;
@@ -45,41 +39,33 @@ public final class UpdateManager
         return updater.getLastResult().requiresUpdate();
     }
 
-    public void checkForUpdates()
-    {
+    public void checkForUpdates() {
         updater.requestUpdateCheck().whenComplete(
-            (result, throwable) ->
-            {
-                boolean updateAvailable = updateAvailable();
-                if (updateAvailable)
-                    plugin.myLogger(Level.INFO,
-                                    "A new update is available: " + plugin.getUpdateManager().getNewestVersion());
-            });
+                (result, throwable) ->
+                {
+                    boolean updateAvailable = updateAvailable();
+                    if (updateAvailable)
+                        plugin.myLogger(Level.INFO,
+                                "A new update is available: " + plugin.getUpdateManager().getNewestVersion());
+                });
     }
 
-    private void initUpdater()
-    {
-        if (checkForUpdates)
-        {
+    private void initUpdater() {
+        if (checkForUpdates) {
             // Run the UpdateChecker regularly.
             if (updateRunner == null)
-                updateRunner = new BukkitRunnable()
-                {
+                updateRunner = new BukkitRunnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         checkForUpdates();
                     }
                     // Run immediately, then every 12 hours.
                 }.runTaskTimer(plugin, 0L, 864000L);
-        }
-        else
-        {
+        } else {
             plugin.myLogger(Level.INFO,
-                            "Plugin update checking not enabled! You will not receive any messages about new updates " +
-                                "for this plugin. Please consider turning this on in the config.");
-            if (updateRunner != null)
-            {
+                    "Plugin update checking not enabled! You will not receive any messages about new updates " +
+                            "for this plugin. Please consider turning this on in the config.");
+            if (updateRunner != null) {
                 updateRunner.cancel();
                 updateRunner = null;
             }

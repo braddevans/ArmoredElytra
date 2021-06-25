@@ -10,26 +10,22 @@ import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.SmithingInventory;
 
-public class NetheriteUpgradeListener extends SmithingTableListener
-{
-    public NetheriteUpgradeListener(final ArmoredElytra plugin)
-    {
+public class NetheriteUpgradeListener extends SmithingTableListener {
+    public NetheriteUpgradeListener(final ArmoredElytra plugin) {
         super(plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onSmithingTableUsage(final PrepareSmithingEvent event)
-    {
+    public void onSmithingTableUsage(final PrepareSmithingEvent event) {
         super.onSmithingTableUsage(event);
     }
 
     @Override
-    protected ArmorTier getArmorTier(ItemStack itemStackA, ItemStack itemStackB)
-    {
+    protected ArmorTier getArmorTier(ItemStack itemStackA, ItemStack itemStackB) {
         if (itemStackA == null || itemStackB == null ||
-            itemStackA.getType() != Material.ELYTRA ||
-            plugin.getNbtEditor().getArmorTier(itemStackA) != ArmorTier.DIAMOND ||
-            itemStackB.getType() != Material.NETHERITE_INGOT)
+                itemStackA.getType() != Material.ELYTRA ||
+                plugin.getNbtEditor().getArmorTier(itemStackA) != ArmorTier.DIAMOND ||
+                itemStackB.getType() != Material.NETHERITE_INGOT)
             return ArmorTier.NONE;
 
         // For some reason, adding multiple netherite ingots causes the view to not update properly.
@@ -43,8 +39,7 @@ public class NetheriteUpgradeListener extends SmithingTableListener
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event)
-    {
+    public void onInventoryClick(InventoryClickEvent event) {
         if (!isAESmithingTableEvent(event))
             return;
 

@@ -17,17 +17,15 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.Collection;
 import java.util.UUID;
 
-public class NBTEditor implements INBTEditor
-{
+public class NBTEditor implements INBTEditor {
     private static final NamespacedKey armorTierKey = new NamespacedKey(ArmoredElytra.getInstance(),
-                                                                        "ARMOR_TIER_LEVEL");
+            "ARMOR_TIER_LEVEL");
     private static final NamespacedKey armorColorKey = new NamespacedKey(ArmoredElytra.getInstance(),
-                                                                         "ARMORED_ELYTRA_COLOR");
+            "ARMORED_ELYTRA_COLOR");
 
     @Override
     public ItemStack addArmorNBTTags(ItemStack item, ArmorTier armorTier, boolean unbreakable, final String name,
-                                     final Color color)
-    {
+                                     final Color color) {
         if (armorTier == null || armorTier == ArmorTier.NONE)
             return new ItemStack(item);
 
@@ -43,11 +41,11 @@ public class NBTEditor implements INBTEditor
         overwriteNBTValue(meta, Attribute.GENERIC_ARMOR, ArmorTier.getArmor(armorTier), "generic.armor");
         if (ArmorTier.getToughness(armorTier) > 0)
             overwriteNBTValue(meta, Attribute.GENERIC_ARMOR_TOUGHNESS, ArmorTier.getToughness(armorTier),
-                              "generic.armor_toughness");
+                    "generic.armor_toughness");
 
         if (ArmorTier.getKnockbackResistance(armorTier) > 0)
             overwriteNBTValue(meta, Attribute.GENERIC_KNOCKBACK_RESISTANCE, ArmorTier.getKnockbackResistance(armorTier),
-                              "generic.knockback_resistance");
+                    "generic.knockback_resistance");
 
         meta.setUnbreakable(unbreakable);
         meta.setDisplayName(name);
@@ -56,20 +54,18 @@ public class NBTEditor implements INBTEditor
         return ret;
     }
 
-    private void overwriteNBTValue(ItemMeta meta, Attribute attribute, double value, String modifierName)
-    {
+    private void overwriteNBTValue(ItemMeta meta, Attribute attribute, double value, String modifierName) {
         if (meta.hasAttributeModifiers())
             meta.removeAttributeModifier(attribute);
 
         AttributeModifier attributeModifier = new AttributeModifier(UUID.randomUUID(), modifierName, value,
-                                                                    AttributeModifier.Operation.ADD_NUMBER,
-                                                                    EquipmentSlot.CHEST);
+                AttributeModifier.Operation.ADD_NUMBER,
+                EquipmentSlot.CHEST);
         meta.addAttributeModifier(attribute, attributeModifier);
     }
 
     @Override
-    public ArmorTier getArmorTier(ItemStack item)
-    {
+    public ArmorTier getArmorTier(ItemStack item) {
         if (item == null)
             return ArmorTier.NONE;
 
@@ -85,8 +81,7 @@ public class NBTEditor implements INBTEditor
         if (attributeModifiers == null)
             return ArmorTier.NONE;
 
-        for (final AttributeModifier attributeModifier : attributeModifiers)
-        {
+        for (final AttributeModifier attributeModifier : attributeModifiers) {
             ArmorTier armorTier = ArmorTier.getArmorTierFromArmor((int) attributeModifier.getAmount());
             if (armorTier != ArmorTier.NONE)
                 return armorTier;
@@ -96,8 +91,7 @@ public class NBTEditor implements INBTEditor
     }
 
     @Override
-    public Color getColorOfArmoredElytra(final ItemStack item)
-    {
+    public Color getColorOfArmoredElytra(final ItemStack item) {
         if (item == null || item.getType() != Material.ELYTRA || !item.hasItemMeta())
             return null;
 

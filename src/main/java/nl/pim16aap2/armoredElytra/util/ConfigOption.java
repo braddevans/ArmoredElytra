@@ -11,18 +11,16 @@ import java.util.List;
  * For Lists, every option appears on a new line after a '-'.
  */
 
-public class ConfigOption<V>
-{
+public class ConfigOption<V> {
     private final ArmoredElytra plugin;
     private final FileConfiguration config;
     private final String optionName;
-    private V value;
     private final V defaultValue;
     private final String[] comment;
+    private V value;
 
     public ConfigOption(ArmoredElytra plugin, FileConfiguration config, String optionName, V defaultValue,
-                        String[] comment)
-    {
+                        String[] comment) {
         this.plugin = plugin;
         this.config = config;
         this.optionName = optionName;
@@ -32,58 +30,49 @@ public class ConfigOption<V>
     }
 
     @SuppressWarnings("unchecked")
-    private void setValue()
-    {
-        try
-        {
+    private void setValue() {
+        try {
             value = (V) config.get(optionName, defaultValue);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             plugin.myLogger(java.util.logging.Level.WARNING, "Failed to read config value of: \"" + optionName +
-                "\"! Using default value instead!");
+                    "\"! Using default value instead!");
             plugin.myLogger(java.util.logging.Level.WARNING, Util.exceptionToString(e));
             value = defaultValue;
         }
     }
 
-    public V getValue()
-    {
+    public V getValue() {
         return value;
     }
 
-    public String[] getComment()
-    {
+    public String[] getComment() {
         return comment;
     }
 
     @Override
-    public String toString()
-    {
-        String string = "";
+    public String toString() {
+        StringBuilder string = new StringBuilder();
 
         // Print the comments, if there are any.
         if (comment != null)
             for (String comLine : comment)
                 // Prefix every line by a comment-sign (#).
-                string += "# " + comLine + "\n";
+                string.append("# ").append(comLine).append("\n");
 
-        string += optionName + ": ";
+        string.append(optionName).append(": ");
         if (value.getClass().isAssignableFrom(String.class))
-            string += "\'" + value.toString() + "\'";
-        else if (value instanceof List<?>)
-        {
+            string.append("'").append(value).append("'");
+        else if (value instanceof List<?>) {
             StringBuilder builder = new StringBuilder();
             builder.append("\n");
             int listSize = ((List<?>) value).size();
             for (int index = 0; index < listSize; ++index)
                 // Don't print newline at the end
                 builder.append("  - " + ((List<?>) value).get(index) + (index == listSize - 1 ? "" : "\n"));
-            string += builder.toString();
-        }
-        else
-            string += value.toString();
+            string.append(builder.toString());
+        } else
+            string.append(value.toString());
 
-        return string;
+        return string.toString();
     }
 }

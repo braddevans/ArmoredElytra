@@ -14,22 +14,18 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class Uninstaller implements Listener
-{
+public class Uninstaller implements Listener {
     private final ArmoredElytra plugin;
 
-    public Uninstaller(ArmoredElytra plugin)
-    {
+    public Uninstaller(ArmoredElytra plugin) {
         this.plugin = plugin;
     }
 
-    public int removeArmoredElytras(Inventory inv)
-    {
+    public int removeArmoredElytras(Inventory inv) {
         int count = 0;
         for (ItemStack is : inv)
             if (is != null && is.getType() == Material.ELYTRA &&
-                ArmoredElytra.getInstance().getNbtEditor().getArmorTier(is) != ArmorTier.NONE)
-            {
+                    ArmoredElytra.getInstance().getNbtEditor().getArmorTier(is) != ArmorTier.NONE) {
                 inv.remove(is);
                 ++count;
             }
@@ -37,38 +33,32 @@ public class Uninstaller implements Listener
     }
 
     @EventHandler
-    public void onChestOpen(InventoryOpenEvent event)
-    {
+    public void onChestOpen(InventoryOpenEvent event) {
         if (event.getInventory().getType().equals(InventoryType.CHEST))
             // Slight delay so the inventory has time to get loaded.
-            new BukkitRunnable()
-            {
+            new BukkitRunnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     Inventory inv = event.getInventory();
                     int removed = removeArmoredElytras(inv);
                     if (removed != 0)
                         plugin.messagePlayer((Player) (event.getPlayer()), ChatColor.RED,
-                                             "Removed " + removed + " armored elytras from your chest!");
+                                "Removed " + removed + " armored elytras from your chest!");
                 }
             }.runTaskLater(plugin, 20);
     }
 
     @EventHandler
-    public void onPlayerLogin(PlayerLoginEvent event)
-    {
+    public void onPlayerLogin(PlayerLoginEvent event) {
         // Slight delay so the inventory has time to get loaded.
-        new BukkitRunnable()
-        {
+        new BukkitRunnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 Inventory inv = event.getPlayer().getInventory();
                 int removed = removeArmoredElytras(inv);
                 if (removed != 0)
                     plugin.messagePlayer(event.getPlayer(), ChatColor.RED,
-                                         "Removed " + removed + " armored elytras from your inventory!");
+                            "Removed " + removed + " armored elytras from your inventory!");
             }
         }.runTaskLater(plugin, 20);
     }

@@ -9,30 +9,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import javax.annotation.CheckReturnValue;
-
 /**
  * Base class for the anvil / smithing table handlers.
  *
  * @author Pim
  */
-abstract class ArmoredElytraHandler
-{
+abstract class ArmoredElytraHandler {
+    private static final Color DEFAULT_LEATHER_COLOR = Bukkit.getServer().getItemFactory().getDefaultLeatherColor();
     protected final ArmoredElytra plugin;
-
     protected final boolean creationEnabled;
 
-    private static final Color DEFAULT_LEATHER_COLOR = Bukkit.getServer().getItemFactory().getDefaultLeatherColor();
-
-    public ArmoredElytraHandler(final ArmoredElytra plugin, final boolean creationEnabled)
-    {
+    public ArmoredElytraHandler(final ArmoredElytra plugin, final boolean creationEnabled) {
         this.plugin = plugin;
         this.creationEnabled = creationEnabled;
     }
 
     // Repair an Armored Elytra
-    protected short repairItem(short curDur, ItemStack repairItem)
-    {
+    protected short repairItem(short curDur, ItemStack repairItem) {
         // Get the multiplier for the repair items.
         double mult = 0.01;
         if (repairItem.getType().equals(Material.LEATHER))
@@ -60,12 +53,14 @@ abstract class ArmoredElytraHandler
      * <p>
      * See {@link LeatherArmorMeta#getColor()}.
      *
-     * @param itemA The first {@link ItemStack} to check.
-     * @param itemB The second {@link ItemStack} to check.
+     * @param itemA
+     *         The first {@link ItemStack} to check.
+     * @param itemB
+     *         The second {@link ItemStack} to check.
+     *
      * @return The color of the item, if it has a color, otherwise null.
      */
-    protected Color getItemColor(final ItemStack itemA, final ItemStack itemB)
-    {
+    protected Color getItemColor(final ItemStack itemA, final ItemStack itemB) {
         final Color colorA = getItemColor(itemA);
         if (colorA != null && !colorA.equals(DEFAULT_LEATHER_COLOR))
             return colorA;
@@ -74,8 +69,7 @@ abstract class ArmoredElytraHandler
         return colorB != null ? colorB : colorA;
     }
 
-    private Color getItemColor(final ItemStack itemStack)
-    {
+    private Color getItemColor(final ItemStack itemStack) {
         if (itemStack == null)
             return null;
 
@@ -91,23 +85,23 @@ abstract class ArmoredElytraHandler
     /**
      * Attempts to move an item to a player's inventory.
      *
-     * @param player The player to give the item to.
-     * @param item   The item to give.
-     * @param direct Whether or not to put it in the player's inventory. When set to false it will be put in their
-     *               cursor instead.
+     * @param player
+     *         The player to give the item to.
+     * @param item
+     *         The item to give.
+     * @param direct
+     *         Whether or not to put it in the player's inventory. When set to false it will be put in their
+     *         cursor instead.
+     *
      * @return True if the item could be given to the player, otherwise false (e.g. when their inventory is full).
      */
-    @CheckReturnValue
-    protected boolean giveItemToPlayer(final Player player, final ItemStack item, final boolean direct)
-    {
-        if (direct)
-        {
+    protected boolean giveItemToPlayer(final Player player, final ItemStack item, final boolean direct) {
+        if (direct) {
             // If the player's inventory is full, don't do anything.
             if (player.getInventory().firstEmpty() == -1)
                 return false;
             player.getInventory().addItem(item);
-        }
-        else
+        } else
             player.setItemOnCursor(item);
         return true;
     }

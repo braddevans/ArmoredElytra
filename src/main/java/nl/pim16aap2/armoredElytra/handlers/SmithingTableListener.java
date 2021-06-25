@@ -15,21 +15,17 @@ import org.bukkit.inventory.SmithingInventory;
 
 import java.util.logging.Level;
 
-abstract class SmithingTableListener extends ArmoredElytraHandler implements Listener
-{
-    protected SmithingTableListener(ArmoredElytra plugin, boolean creationEnabled)
-    {
+abstract class SmithingTableListener extends ArmoredElytraHandler implements Listener {
+    protected SmithingTableListener(ArmoredElytra plugin, boolean creationEnabled) {
         super(plugin, creationEnabled);
 
     }
 
-    protected SmithingTableListener(ArmoredElytra plugin)
-    {
+    protected SmithingTableListener(ArmoredElytra plugin) {
         this(plugin, false);
     }
 
-    public void onSmithingTableUsage(final PrepareSmithingEvent event)
-    {
+    public void onSmithingTableUsage(final PrepareSmithingEvent event) {
         final SmithingInventory inventory = event.getInventory();
         final ItemStack[] contents = inventory.getContents();
 
@@ -43,16 +39,15 @@ abstract class SmithingTableListener extends ArmoredElytraHandler implements Lis
         final Player player = (Player) event.getView().getPlayer();
 
         final ItemStack result;
-        if (plugin.playerHasCraftPerm(player, newTier))
-        {
+        if (plugin.playerHasCraftPerm(player, newTier)) {
 
             EnchantmentContainer enchantments = EnchantmentContainer.getEnchantments(itemStackA, plugin);
             enchantments.merge(EnchantmentContainer.getEnchantments(itemStackB, plugin));
             final Color color = getItemColor(itemStackA, itemStackB);
 
             result = ArmoredElytra.getInstance().getNbtEditor()
-                                  .addArmorNBTTags(new ItemStack(Material.ELYTRA, 1), newTier,
-                                                   plugin.getConfigLoader().unbreakable(), color);
+                    .addArmorNBTTags(new ItemStack(Material.ELYTRA, 1), newTier,
+                            plugin.getConfigLoader().unbreakable(), color);
             enchantments.applyEnchantments(result);
             event.setResult(result);
         }
@@ -62,10 +57,13 @@ abstract class SmithingTableListener extends ArmoredElytraHandler implements Lis
      * Checks if the provided input {@link ItemStack}s form a valid input pattern for a smithing table, and, if so,
      * which tier it combines into.
      *
-     * @param itemStackA The first {@link ItemStack}.
-     * @param itemStackB The second {@link ItemStack}.
+     * @param itemStackA
+     *         The first {@link ItemStack}.
+     * @param itemStackB
+     *         The second {@link ItemStack}.
+     *
      * @return The {@link ArmorTier} as figured out from the input pattern. If the pattern is invalid, {@link
-     * ArmorTier#NONE} is returned.
+     *         ArmorTier#NONE} is returned.
      */
     protected abstract ArmorTier getArmorTier(ItemStack itemStackA, ItemStack itemStackB);
 
@@ -73,11 +71,12 @@ abstract class SmithingTableListener extends ArmoredElytraHandler implements Lis
      * Checks if an {@link InventoryClickEvent} is useful for this plugin. I.e., it is about a smithing inventory and
      * there is an (armored) elytra involved somehow.
      *
-     * @param event The {@link InventoryClickEvent} which may be of use to us.
+     * @param event
+     *         The {@link InventoryClickEvent} which may be of use to us.
+     *
      * @return True if this plugin can process this event further.
      */
-    protected boolean isAESmithingTableEvent(final InventoryClickEvent event)
-    {
+    protected boolean isAESmithingTableEvent(final InventoryClickEvent event) {
         if (event.getRawSlot() != 2)
             return false;
 
@@ -89,30 +88,24 @@ abstract class SmithingTableListener extends ArmoredElytraHandler implements Lis
         SmithingInventory smithingInventory;
         // Try to cast inventory being used in the event to a smithing inventory.
         // This will throw a ClassCastException when a CraftInventoryCustom is used.
-        try
-        {
+        try {
             smithingInventory = (SmithingInventory) event.getInventory();
-        }
-        catch (ClassCastException exception)
-        {
+        } catch (ClassCastException exception) {
             // Print warning to console and exit onInventoryClick event (no support for
             // custom inventories as they are usually used for GUI's).
             plugin.debugMsg(Level.WARNING, "Could not cast inventory to SmithingInventory for player " +
-                player.getName() + "! Armored Elytras cannot be crafted!");
+                    player.getName() + "! Armored Elytras cannot be crafted!");
             exception.printStackTrace();
             return false;
         }
 
         if (smithingInventory.getItem(0) == null ||
-            smithingInventory.getItem(1) == null ||
-            smithingInventory.getItem(2) == null)
+                smithingInventory.getItem(1) == null ||
+                smithingInventory.getItem(2) == null)
             return false;
 
         final ItemStack result = smithingInventory.getItem(2);
-        if (result == null || result.getType() != Material.ELYTRA ||
-            ArmoredElytra.getInstance().getNbtEditor().getArmorTier(result) == ArmorTier.NONE)
-            return false;
-
-        return true;
+        return result != null && result.getType() == Material.ELYTRA &&
+                ArmoredElytra.getInstance().getNbtEditor().getArmorTier(result) != ArmorTier.NONE;
     }
 }

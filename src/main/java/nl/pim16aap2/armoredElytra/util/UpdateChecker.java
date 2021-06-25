@@ -34,16 +34,17 @@ import java.util.regex.Pattern;
  *
  * @author Parker Hawke - 2008Choco
  */
-public final class UpdateChecker
-{
+public final class UpdateChecker {
+    private static final String USER_AGENT = "ArmoredElytra-update-checker";
+    private static final String UPDATE_URL = "https://api.spiget.org/v2/resources/%d/versions?size=1&sort=-releaseDate";
+    private static final Pattern DECIMAL_SCHEME_PATTERN = Pattern.compile("\\d+(?:\\.\\d+)*");
     public static final IVersionScheme VERSION_SCHEME_DECIMAL = (first, second) ->
     {
         String[] firstSplit = splitVersionInfo(first), secondSplit = splitVersionInfo(second);
         if (firstSplit == null || secondSplit == null)
             return null;
 
-        for (int i = 0; i < Math.min(firstSplit.length, secondSplit.length); i++)
-        {
+        for (int i = 0; i < Math.min(firstSplit.length, secondSplit.length); i++) {
             int currentValue = NumberUtils.toInt(firstSplit[i]), newestValue = NumberUtils.toInt(secondSplit[i]);
 
             if (newestValue > currentValue)
@@ -54,119 +55,19 @@ public final class UpdateChecker
 
         return (secondSplit.length > firstSplit.length) ? second : first;
     };
-
-    private static final String USER_AGENT = "ArmoredElytra-update-checker";
-    private static final String UPDATE_URL = "https://api.spiget.org/v2/resources/%d/versions?size=1&sort=-releaseDate";
-    private static final Pattern DECIMAL_SCHEME_PATTERN = Pattern.compile("\\d+(?:\\.\\d+)*");
-
     private static UpdateChecker instance;
-
-    private UpdateResult lastResult = null;
-
     private final ArmoredElytra plugin;
     private final int pluginID;
     private final IVersionScheme versionScheme;
+    private UpdateResult lastResult = null;
 
-    private UpdateChecker(final ArmoredElytra plugin, final int pluginID, final IVersionScheme versionScheme)
-    {
+    private UpdateChecker(final ArmoredElytra plugin, final int pluginID, final IVersionScheme versionScheme) {
         this.plugin = plugin;
         this.pluginID = pluginID;
         this.versionScheme = versionScheme;
     }
 
-    /**
-     * Requests an update check to SpiGet. This request is asynchronous and may not complete immediately as an HTTP GET
-     * request is published to the SpiGet API.
-     *
-     * @return a future update result
-     */
-    public CompletableFuture<UpdateResult> requestUpdateCheck()
-    {
-        return CompletableFuture.supplyAsync(
-            () ->
-            {
-                int responseCode;
-                try
-                {
-                    URL url = new URL(String.format(UPDATE_URL, pluginID));
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.addRequestProperty("User-Agent", USER_AGENT);
-
-                    InputStreamReader reader = new InputStreamReader(connection.getInputStream());
-                    responseCode = connection.getResponseCode();
-
-                    JsonElement element = new JsonParser().parse(reader);
-                    if (!element.isJsonArray())
-                        return new UpdateResult(UpdateReason.INVALID_JSON);
-
-                    reader.close();
-
-                    JsonObject versionObject = element.getAsJsonArray().get(0).getAsJsonObject();
-
-                    long age = -1;
-                    String ageString = versionObject.get("releaseDate").getAsString();
-                    try
-                    {
-                        age = getAge(Long.parseLong(ageString));
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        plugin.myLogger(Level.WARNING,
-                                        "Failed to obtain age of update from ageString: \"" + ageString + "\"");
-                    }
-
-                    String current = plugin.getDescription().getVersion(), newest = versionObject.get("name")
-                                                                                                 .getAsString();
-                    String latest = versionScheme.compareVersions(current, newest);
-
-                    if (latest == null)
-                        return new UpdateResult(UpdateReason.UNSUPPORTED_VERSION_SCHEME);
-                    else if (latest.equals(current))
-                        return new UpdateResult(current.equals(newest) ?
-                                                UpdateReason.UP_TO_DATE :
-                                                UpdateReason.UNRELEASED_VERSION, current, age);
-                    else if (latest.equals(newest))
-                        return new UpdateResult(UpdateReason.NEW_UPDATE, latest, age);
-                }
-                catch (IOException e)
-                {
-                    return new UpdateResult(UpdateReason.COULD_NOT_CONNECT);
-                }
-                catch (JsonSyntaxException e)
-                {
-                    return new UpdateResult(UpdateReason.INVALID_JSON);
-                }
-
-                return new UpdateResult(responseCode == 401 ?
-                                        UpdateReason.UNAUTHORIZED_QUERY : UpdateReason.UNKNOWN_ERROR);
-            });
-    }
-
-    /**
-     * Gets the difference in seconds between a given time and the current time.
-     *
-     * @param updateTime A moment in time to compare the current time to.
-     * @return The difference in seconds between a given time and the current time.
-     */
-    private long getAge(final long updateTime)
-    {
-        long currentTime = Instant.now().getEpochSecond();
-        return currentTime - updateTime;
-    }
-
-    /**
-     * Gets the last update result that was queried by {@link #requestUpdateCheck()}. If no update check was performed
-     * since this class' initialization, this method will return null.
-     *
-     * @return the last update check result. null if none.
-     */
-    public UpdateResult getLastResult()
-    {
-        return lastResult;
-    }
-
-    private static String[] splitVersionInfo(String version)
-    {
+    private static String[] splitVersionInfo(String version) {
         Matcher matcher = DECIMAL_SCHEME_PATTERN.matcher(version);
         if (!matcher.find())
             return null;
@@ -179,15 +80,18 @@ public final class UpdateChecker
      * UpdateChecker has already been initialized, this method will act similarly to {@link #get()} (which is
      * recommended after initialization).
      *
-     * @param plugin        the plugin for which to check updates. Cannot be null
-     * @param pluginID      the ID of the plugin as identified in the SpigotMC resource link. For example,
-     *                      "https://www.spigotmc.org/resources/veinminer.<b>12038</b>/" would expect "12038" as a
-     *                      value. The value must be greater than 0
-     * @param versionScheme a custom version scheme parser. Cannot be null
+     * @param plugin
+     *         the plugin for which to check updates. Cannot be null
+     * @param pluginID
+     *         the ID of the plugin as identified in the SpigotMC resource link. For example,
+     *         "https://www.spigotmc.org/resources/veinminer.<b>12038</b>/" would expect "12038" as a
+     *         value. The value must be greater than 0
+     * @param versionScheme
+     *         a custom version scheme parser. Cannot be null
+     *
      * @return the UpdateChecker instance
      */
-    public static UpdateChecker init(final ArmoredElytra plugin, final int pluginID, final IVersionScheme versionScheme)
-    {
+    public static UpdateChecker init(final ArmoredElytra plugin, final int pluginID, final IVersionScheme versionScheme) {
         Preconditions.checkArgument(pluginID > 0, "Plugin ID must be greater than 0");
 
         return (instance == null) ? instance = new UpdateChecker(plugin, pluginID, versionScheme) : instance;
@@ -198,14 +102,16 @@ public final class UpdateChecker
      * UpdateChecker has already been initialized, this method will act similarly to {@link #get()} (which is
      * recommended after initialization).
      *
-     * @param plugin   the plugin for which to check updates. Cannot be null
-     * @param pluginID the ID of the plugin as identified in the SpigotMC resource link. For example,
-     *                 "https://www.spigotmc.org/resources/veinminer.<b>12038</b>/" would expect "12038" as a value. The
-     *                 value must be greater than 0
+     * @param plugin
+     *         the plugin for which to check updates. Cannot be null
+     * @param pluginID
+     *         the ID of the plugin as identified in the SpigotMC resource link. For example,
+     *         "https://www.spigotmc.org/resources/veinminer.<b>12038</b>/" would expect "12038" as a value. The
+     *         value must be greater than 0
+     *
      * @return the UpdateChecker instance
      */
-    public static UpdateChecker init(final ArmoredElytra plugin, final int pluginID)
-    {
+    public static UpdateChecker init(final ArmoredElytra plugin, final int pluginID) {
         return init(plugin, pluginID, VERSION_SCHEME_DECIMAL);
     }
 
@@ -215,10 +121,9 @@ public final class UpdateChecker
      *
      * @return the UpdateChecker instance
      */
-    public static UpdateChecker get()
-    {
+    public static UpdateChecker get() {
         Preconditions.checkState(instance != null,
-                                 "Instance has not yet been initialized. Be sure #init() has been invoked");
+                "Instance has not yet been initialized. Be sure #init() has been invoked");
         return instance;
     }
 
@@ -228,35 +133,96 @@ public final class UpdateChecker
      *
      * @return true if initialized, false otherwise
      */
-    public static boolean isInitialized()
-    {
+    public static boolean isInitialized() {
         return instance != null;
     }
 
     /**
-     * A functional interface to compare two version Strings with similar version schemes.
+     * Requests an update check to SpiGet. This request is asynchronous and may not complete immediately as an HTTP GET
+     * request is published to the SpiGet API.
+     *
+     * @return a future update result
      */
-    @FunctionalInterface
-    public interface IVersionScheme
-    {
+    public CompletableFuture<UpdateResult> requestUpdateCheck() {
+        return CompletableFuture.supplyAsync(
+                () ->
+                {
+                    int responseCode;
+                    try {
+                        URL url = new URL(String.format(UPDATE_URL, pluginID));
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.addRequestProperty("User-Agent", USER_AGENT);
 
-        /**
-         * Compare two versions and return the higher of the two. If null is returned, it is assumed that at least one
-         * of the two versions are unsupported by this version scheme parser.
-         *
-         * @param first  the first version to check
-         * @param second the second version to check
-         * @return the greater of the two versions. null if unsupported version schemes
-         */
-        String compareVersions(String first, String second);
+                        InputStreamReader reader = new InputStreamReader(connection.getInputStream());
+                        responseCode = connection.getResponseCode();
 
+                        JsonElement element = new JsonParser().parse(reader);
+                        if (!element.isJsonArray())
+                            return new UpdateResult(UpdateReason.INVALID_JSON);
+
+                        reader.close();
+
+                        JsonObject versionObject = element.getAsJsonArray().get(0).getAsJsonObject();
+
+                        long age = -1;
+                        String ageString = versionObject.get("releaseDate").getAsString();
+                        try {
+                            age = getAge(Long.parseLong(ageString));
+                        } catch (NumberFormatException e) {
+                            plugin.myLogger(Level.WARNING,
+                                    "Failed to obtain age of update from ageString: \"" + ageString + "\"");
+                        }
+
+                        String current = plugin.getDescription().getVersion(), newest = versionObject.get("name")
+                                .getAsString();
+                        String latest = versionScheme.compareVersions(current, newest);
+
+                        if (latest == null)
+                            return new UpdateResult(UpdateReason.UNSUPPORTED_VERSION_SCHEME);
+                        else if (latest.equals(current))
+                            return new UpdateResult(current.equals(newest) ?
+                                    UpdateReason.UP_TO_DATE :
+                                    UpdateReason.UNRELEASED_VERSION, current, age);
+                        else if (latest.equals(newest))
+                            return new UpdateResult(UpdateReason.NEW_UPDATE, latest, age);
+                    } catch (IOException e) {
+                        return new UpdateResult(UpdateReason.COULD_NOT_CONNECT);
+                    } catch (JsonSyntaxException e) {
+                        return new UpdateResult(UpdateReason.INVALID_JSON);
+                    }
+
+                    return new UpdateResult(responseCode == 401 ?
+                            UpdateReason.UNAUTHORIZED_QUERY : UpdateReason.UNKNOWN_ERROR);
+                });
+    }
+
+    /**
+     * Gets the difference in seconds between a given time and the current time.
+     *
+     * @param updateTime
+     *         A moment in time to compare the current time to.
+     *
+     * @return The difference in seconds between a given time and the current time.
+     */
+    private long getAge(final long updateTime) {
+        long currentTime = Instant.now().getEpochSecond();
+        return currentTime - updateTime;
+    }
+
+    /**
+     * Gets the last update result that was queried by {@link #requestUpdateCheck()}. If no update check was performed
+     * since this class' initialization, this method will return null.
+     *
+     * @return the last update check result. null if none.
+     */
+    public UpdateResult getLastResult() {
+        return lastResult;
     }
 
     /**
      * A constant reason for the result of {@link UpdateResult}.
      */
-    public enum UpdateReason
-    {
+    public enum UpdateReason {
 
         /**
          * A new update is available for download.
@@ -305,10 +271,30 @@ public final class UpdateChecker
     }
 
     /**
+     * A functional interface to compare two version Strings with similar version schemes.
+     */
+    @FunctionalInterface
+    public interface IVersionScheme {
+
+        /**
+         * Compare two versions and return the higher of the two. If null is returned, it is assumed that at least one
+         * of the two versions are unsupported by this version scheme parser.
+         *
+         * @param first
+         *         the first version to check
+         * @param second
+         *         the second version to check
+         *
+         * @return the greater of the two versions. null if unsupported version schemes
+         */
+        String compareVersions(String first, String second);
+
+    }
+
+    /**
      * Represents a result for an update query performed by {@link UpdateChecker#requestUpdateCheck()}.
      */
-    public final class UpdateResult
-    {
+    public final class UpdateResult {
         private final UpdateReason reason;
         private final String newestVersion;
         private final long age;
@@ -317,18 +303,16 @@ public final class UpdateChecker
             lastResult = this;
         }
 
-        private UpdateResult(final UpdateReason reason, final String newestVersion, final long age)
-        {
+        private UpdateResult(final UpdateReason reason, final String newestVersion, final long age) {
             this.reason = reason;
             this.newestVersion = newestVersion;
             this.age = age;
         }
 
-        private UpdateResult(final UpdateReason reason)
-        {
+        private UpdateResult(final UpdateReason reason) {
             Preconditions
-                .checkArgument(reason != UpdateReason.NEW_UPDATE && reason != UpdateReason.UP_TO_DATE,
-                               "Reasons that might require updates must also provide the latest version String");
+                    .checkArgument(reason != UpdateReason.NEW_UPDATE && reason != UpdateReason.UP_TO_DATE,
+                            "Reasons that might require updates must also provide the latest version String");
             this.reason = reason;
             newestVersion = plugin.getDescription().getVersion();
             age = -1;
@@ -339,8 +323,7 @@ public final class UpdateChecker
          *
          * @return the reason
          */
-        public UpdateReason getReason()
-        {
+        public UpdateReason getReason() {
             return reason;
         }
 
@@ -349,8 +332,7 @@ public final class UpdateChecker
          *
          * @return true if requires update, false otherwise
          */
-        public boolean requiresUpdate()
-        {
+        public boolean requiresUpdate() {
             return reason == UpdateReason.NEW_UPDATE;
         }
 
@@ -360,8 +342,7 @@ public final class UpdateChecker
          *
          * @return the newest version of the plugin
          */
-        public String getNewestVersion()
-        {
+        public String getNewestVersion() {
             return newestVersion;
         }
 
@@ -370,8 +351,7 @@ public final class UpdateChecker
          *
          * @return The number of seconds since the last update was released or -1 if unavailable.
          */
-        public long getAge()
-        {
+        public long getAge() {
             return age;
         }
     }

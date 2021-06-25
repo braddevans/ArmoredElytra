@@ -10,18 +10,15 @@ import org.bukkit.event.block.BlockDispenseArmorEvent;
  * @author Arnah
  * @since Feb 08, 2019
  */
-public class DispenserArmorListener implements Listener
-{
+public class DispenserArmorListener implements Listener {
     @EventHandler
-    public void dispenseArmorEvent(BlockDispenseArmorEvent event)
-    {
+    public void dispenseArmorEvent(BlockDispenseArmorEvent event) {
         ArmorType type = ArmorType.matchType(event.getItem());
         if (type != null)
-            if (event.getTargetEntity() instanceof Player)
-            {
+            if (event.getTargetEntity() instanceof Player) {
                 Player p = (Player) event.getTargetEntity();
                 ArmorEquipEvent armorEquipEvent = new ArmorEquipEvent(p, ArmorEquipEvent.EquipMethod.DISPENSER, type,
-                                                                      null, event.getItem());
+                        null, event.getItem());
                 Bukkit.getServer().getPluginManager().callEvent(armorEquipEvent);
                 if (armorEquipEvent.isCancelled())
                     event.setCancelled(true);

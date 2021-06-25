@@ -8,36 +8,30 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
 
-public class Util
-{
-    public static String errorToString(Error e)
-    {
+public class Util {
+    public static String errorToString(Error e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
     }
 
-    public static String exceptionToString(Exception e)
-    {
+    public static String exceptionToString(Exception e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
     }
 
     // Check if an item is broken or not.
-    public static boolean isBroken(ItemStack item)
-    {
+    public static boolean isBroken(ItemStack item) {
         return item.getDurability() >= item.getType().getMaxDurability();
     }
 
     // Get the armor tier from a chest plate.
-    public static ArmorTier armorToTier(Material mat)
-    {
+    public static ArmorTier armorToTier(Material mat) {
         ArmorTier ret = ArmorTier.NONE;
         XMaterial xmat = XMaterial.matchXMaterial(mat);
 
-        switch (xmat)
-        {
+        switch (xmat) {
             case LEATHER_CHESTPLATE:
                 ret = ArmorTier.LEATHER;
                 break;
@@ -62,32 +56,26 @@ public class Util
         return ret;
     }
 
-    public static boolean isChestPlate(ItemStack itemStack)
-    {
+    public static boolean isChestPlate(ItemStack itemStack) {
         return isChestPlate(itemStack.getType());
     }
 
     // Check if mat is a chest plate.
-    public static boolean isChestPlate(Material mat)
-    {
-        try
-        {
+    public static boolean isChestPlate(Material mat) {
+        try {
             XMaterial xmat = XMaterial.matchXMaterial(mat);
 
             return xmat == XMaterial.LEATHER_CHESTPLATE || xmat == XMaterial.GOLDEN_CHESTPLATE ||
-                xmat == XMaterial.CHAINMAIL_CHESTPLATE || xmat == XMaterial.IRON_CHESTPLATE ||
-                xmat == XMaterial.DIAMOND_CHESTPLATE || xmat == XMaterial.NETHERITE_CHESTPLATE;
-        }
-        catch (IllegalArgumentException e)
-        {
+                    xmat == XMaterial.CHAINMAIL_CHESTPLATE || xmat == XMaterial.IRON_CHESTPLATE ||
+                    xmat == XMaterial.DIAMOND_CHESTPLATE || xmat == XMaterial.NETHERITE_CHESTPLATE;
+        } catch (IllegalArgumentException e) {
             // No need to handle this, this is just XMaterial complaining the material doesn't exist.
             return false;
         }
     }
 
     // Function that returns which/how many protection enchantments there are.
-    public static int getProtectionEnchantmentsVal(Map<Enchantment, Integer> enchantments)
-    {
+    public static int getProtectionEnchantmentsVal(Map<Enchantment, Integer> enchantments) {
         int ret = 0;
         if (enchantments.containsKey(Enchantment.PROTECTION_ENVIRONMENTAL))
             ret += 1;

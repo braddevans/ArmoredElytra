@@ -1,6 +1,5 @@
 package nl.pim16aap2.armoredElytra.util;
 
-public enum AllowedToWearEnum
-{
+public enum AllowedToWearEnum {
     BROKEN, NOPERMISSION, ALLOWED
 }

@@ -7,17 +7,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 
-public class FlyDurabilityHandler implements Listener
-{
-    public FlyDurabilityHandler()
-    {
+public class FlyDurabilityHandler implements Listener {
+    public FlyDurabilityHandler() {
     }
 
     // Do not decrease elytra durability while flying. This also cancels durability decrease when
     // it should (i.e. getting hit) while flying, but I don't really care.
     @EventHandler
-    public void onItemDamage(PlayerItemDamageEvent e)
-    {
+    public void onItemDamage(PlayerItemDamageEvent e) {
         if (e.getItem().getType() != Material.ELYTRA)
             return;
 

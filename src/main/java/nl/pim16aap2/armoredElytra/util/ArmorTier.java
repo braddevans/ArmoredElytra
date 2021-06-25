@@ -5,8 +5,7 @@ import org.bukkit.Material;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum ArmorTier
-{
+public enum ArmorTier {
     // Tier:  TierID, armor-value, armor-toughness, knockbackResistance, repair
     NONE(0, 0, 0, 0, null, ""),
     LEATHER(1, 3, 0, 0, Material.LEATHER, "leather"),
@@ -17,82 +16,12 @@ public enum ArmorTier
     NETHERITE(6, 8, 3, 0.1, XMaterial.NETHERITE_INGOT.parseMaterial(), "netherite"),
     ;
 
-    private final int tierID;
-    private final int armor;
-    private final int toughness;
-    private final double knockbackResistance;
-    private final Material repair;
-    private final String name;
     private static final Map<String, ArmorTier> map = new HashMap<>();
     private static final Map<Integer, ArmorTier> armorValueMap = new HashMap<>();
     private static final Map<Integer, ArmorTier> armorIDMap = new HashMap<>();
 
-    ArmorTier(int tierID, int armor, int toughness, double knockbackResistance, Material repair, String name)
-    {
-        this.tierID = tierID;
-        this.armor = armor;
-        this.toughness = toughness;
-        this.knockbackResistance = knockbackResistance;
-        this.repair = repair;
-        this.name = name;
-    }
-
-    // return the armor value of a tier.
-    public static int getArmor(ArmorTier tier)
-    {
-        return tier.armor;
-    }
-
-    // return the armor value of a tier.
-    public static int getTierID(ArmorTier tier)
-    {
-        return tier.tierID;
-    }
-
-    // return the armor toughness of a tier.
-    public static int getToughness(ArmorTier tier)
-    {
-        return tier.toughness;
-    }
-
-    // return the armor toughness of a tier.
-    public static double getKnockbackResistance(ArmorTier tier)
-    {
-        return tier.knockbackResistance;
-    }
-
-    // return the repair item of a tier
-    public static Material getRepairItem(ArmorTier tier)
-    {
-        return tier.repair;
-    }
-
-    public static String getName(ArmorTier tier)
-    {
-        return tier.name;
-    }
-
-    public static ArmorTier valueOfName(String name)
-    {
-        return map.get(name);
-    }
-
-    public static ArmorTier getArmorTierFromArmor(int armor)
-    {
-        ArmorTier tier = armorValueMap.get(armor);
-        return tier == null ? ArmorTier.NONE : tier;
-    }
-
-    public static ArmorTier getArmorTierFromID(int tierID)
-    {
-        ArmorTier tier = armorIDMap.get(tierID);
-        return tier == null ? ArmorTier.NONE : tier;
-    }
-
-    static
-    {
-        for (ArmorTier tier : ArmorTier.values())
-        {
+    static {
+        for (ArmorTier tier : ArmorTier.values()) {
             map.put(tier.name, tier);
             armorValueMap.put(tier.armor, tier);
             armorIDMap.put(tier.tierID, tier);
@@ -104,5 +33,64 @@ public enum ArmorTier
         // While no new elytras can be created using the old system, some may still
         // be around from when it was still used.
         armorValueMap.put(ArmorTier.DIAMOND.armor, ArmorTier.DIAMOND);
+    }
+
+    private final int tierID;
+    private final int armor;
+    private final int toughness;
+    private final double knockbackResistance;
+    private final Material repair;
+    private final String name;
+
+    ArmorTier(int tierID, int armor, int toughness, double knockbackResistance, Material repair, String name) {
+        this.tierID = tierID;
+        this.armor = armor;
+        this.toughness = toughness;
+        this.knockbackResistance = knockbackResistance;
+        this.repair = repair;
+        this.name = name;
+    }
+
+    // return the armor value of a tier.
+    public static int getArmor(ArmorTier tier) {
+        return tier.armor;
+    }
+
+    // return the armor value of a tier.
+    public static int getTierID(ArmorTier tier) {
+        return tier.tierID;
+    }
+
+    // return the armor toughness of a tier.
+    public static int getToughness(ArmorTier tier) {
+        return tier.toughness;
+    }
+
+    // return the armor toughness of a tier.
+    public static double getKnockbackResistance(ArmorTier tier) {
+        return tier.knockbackResistance;
+    }
+
+    // return the repair item of a tier
+    public static Material getRepairItem(ArmorTier tier) {
+        return tier.repair;
+    }
+
+    public static String getName(ArmorTier tier) {
+        return tier.name;
+    }
+
+    public static ArmorTier valueOfName(String name) {
+        return map.get(name);
+    }
+
+    public static ArmorTier getArmorTierFromArmor(int armor) {
+        ArmorTier tier = armorValueMap.get(armor);
+        return tier == null ? ArmorTier.NONE : tier;
+    }
+
+    public static ArmorTier getArmorTierFromID(int tierID) {
+        ArmorTier tier = armorIDMap.get(tierID);
+        return tier == null ? ArmorTier.NONE : tier;
     }
 }

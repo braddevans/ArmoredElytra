@@ -7,8 +7,7 @@ import org.bukkit.inventory.ItemStack;
  * @author Arnah
  * @since Jul 30, 2015
  */
-public enum ArmorType
-{
+public enum ArmorType {
     HELMET(5),
     CHESTPLATE(6),
     LEGGINGS(7),
@@ -16,19 +15,19 @@ public enum ArmorType
 
     private final int slot;
 
-    ArmorType(int slot)
-    {
+    ArmorType(int slot) {
         this.slot = slot;
     }
 
     /**
      * Attempts to match the ArmorType for the specified ItemStack.
      *
-     * @param itemStack The ItemStack to parse the type of.
+     * @param itemStack
+     *         The ItemStack to parse the type of.
+     *
      * @return The parsed ArmorType. (null if none were found.)
      */
-    public static final ArmorType matchType(final ItemStack itemStack)
-    {
+    public static ArmorType matchType(final ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().equals(Material.AIR))
             return null;
         if (itemStack.getType().equals(Material.ELYTRA))
@@ -46,8 +45,7 @@ public enum ArmorType
             return null;
     }
 
-    public int getSlot()
-    {
+    public int getSlot() {
         return slot;
     }
 }

@@ -12,34 +12,29 @@ import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.SmithingInventory;
 
-public class SmithingTableCraftHandler extends SmithingTableListener
-{
-    public SmithingTableCraftHandler(final ArmoredElytra plugin)
-    {
+public class SmithingTableCraftHandler extends SmithingTableListener {
+    public SmithingTableCraftHandler(final ArmoredElytra plugin) {
         super(plugin, true);
         // Register the anvil handler with creation disabled so AEs can still be repaired and stuff.
         Bukkit.getPluginManager().registerEvents(new AnvilHandler(plugin, false), plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onSmithingTableUsage(final PrepareSmithingEvent event)
-    {
+    public void onSmithingTableUsage(final PrepareSmithingEvent event) {
         super.onSmithingTableUsage(event);
     }
 
     @Override
-    protected ArmorTier getArmorTier(ItemStack itemStackA, ItemStack itemStackB)
-    {
+    protected ArmorTier getArmorTier(ItemStack itemStackA, ItemStack itemStackB) {
         if (itemStackA == null || itemStackB == null ||
-            itemStackA.getType() != Material.ELYTRA || !Util.isChestPlate(itemStackB))
+                itemStackA.getType() != Material.ELYTRA || !Util.isChestPlate(itemStackB))
             return ArmorTier.NONE;
 
         return Util.armorToTier(itemStackB.getType());
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent e)
-    {
+    public void onInventoryClick(InventoryClickEvent e) {
         if (!isAESmithingTableEvent(e))
             return;
         SmithingInventory smithingInventory = (SmithingInventory) e.getInventory();
